@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sana Bir Şey Söylemeliyim...</title>
+    <!-- El yazısı fontu için Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Yıldızlar */
+        #starsCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        /* Soru Kutusu */
+        .step-box {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px 20px;
+            border-radius: 24px;
+            width: 100%;
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            min-height: 80px;
+        }
+
+        button {
+            padding: 14px 28px;
+            font-size: 18px;
+            font-weight: 500;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        #yesBtn {
+            background-color: #fff;
+            color: #000;
+            z-index: 2;
+        }
+
+        #noBtn {
+            background-color: #222;
+            color: #888;
+            border: 1px solid #333;
+        }
+
+        /* Buket Sahnesi */
+        .bouquet-scene {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+
+        .bouquet-img {
+            width: 320px;
+            height: auto;
+            max-height: 350px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.2));
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 2s ease-out;
+        }
+
+        .cinematic-text {
+            font-size: 22px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            margin-bottom: 25px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 2s ease-out 1s;
+        }
+
+        /* Yeni Aksiyon Butonları (Notu Oku / Devam Et) */
+        .action-btns {
+            display: flex;
+            gap: 15px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 2s ease-out 1.5s;
+        }
+
+        .action-btns button {
+            font-size: 16px;
+            padding: 12px 20px;
+        }
+
+        .btn-note {
+            background-color: #fdf1d5;
+            color: #5c3a21;
+            box-shadow: 0 0 15px rgba(253, 241, 213, 0.3);
+        }
+
+        .btn-continue {
+            background-color: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+        }
+
+        /* Eskitilmiş Kağıt Not Modalı */
+        .paper-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .paper-content {
+            background-color: #fdf1d5;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0) 90%, rgba(200,180,150,0.2) 100%),
+                linear-gradient(to bottom, rgba(255,255,255,0) 90%, rgba(200,180,150,0.2) 100%);
+            box-shadow: inset 0 0 50px rgba(150, 100, 50, 0.3), 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 5px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            padding: 30px 20px;
+            overflow-y: auto;
+            color: #3b2a1a;
+            font-family: 'Caveat', cursive;
+            font-size: 24px;
+            line-height: 1.4;
+            text-align: left;
+            position: relative;
+            transform: scale(0.9) rotate(-1deg);
+            transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .paper-content p {
+            margin-bottom: 15px;
+        }
+
+        .paper-content strong {
+            font-weight: 700;
+            font-size: 26px;
+        }
+
+        .close-note-btn {
+            display: block;
+            margin: 20px auto 0;
+            background-color: #5c3a21;
+            color: #fdf1d5;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: -apple-system, sans-serif;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+            transform: scale(0.9) !important;
+            pointer-events: none;
+        }
+
+        .fade-in {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        .modal-active {
+            opacity: 1 !important;
+        }
+        
+        .modal-active .paper-content {
+            transform: scale(1) rotate(-1deg) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="starsCanvas"></canvas>
+
+    <div class="container">
+        <!-- 1. ve 2. Soruların Kutusu -->
+        <div class="step-box" id="questionBox">
+            <h2 id="questionText">Beni seviyor musun?</h2>
+            <div class="btn-group">
+                <button id="yesBtn" onclick="handleYes()">Evet</button>
+                <button id="noBtn" onclick="handleNo()">Hayır</button>
+            </div>
+        </div>
+
+        <!-- Buket Sahnesi ve Butonlar -->
+        <div class="bouquet-scene" id="bouquetScene">
+            <img src="cicek.png" class="bouquet-img" id="bouquetImage" alt="Papatya Buketi">
+            <div class="cinematic-text" id="cinematicText">Dünyanın en güzel çiçeğine...</div>
+            
+            <div class="action-btns" id="actionBtns">
+                <button class="btn-note" onclick="openNote()">📜 Notu Oku</button>
+                <button class="btn-continue" onclick="continueToNext()">Devam Et ➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Eskitilmiş Kağıt Not Alanı -->
+    <div class="paper-modal-overlay" id="paperModal">
+        <div class="paper-content">
+            <p>Sevgiliimm, bitaneemm, her şeyim…</p>
+            <p>Bu güzelim papatyalar senin içinnn. Sakın yadırgama şimdi çiçek almamış böyle yapmış diye. Çiçek alsam getirmiyolar oraya e birinden yardım istesem kimden isticem esra ablacım yok 🥲.</p>
+            <p>Neyse, sen bunu elinde bir buketmiş gibi gör tamam mı o kadar uğraştım çünkü 😘. Ben seni çok kırmışım onu anladım. Özür babında böyle bir şey yapmak istedim sana. Önce aliyim dedim sonra çıkmaza girince bunu yaptım.</p>
+            <p>Yapmışım bi eşeklik kırmış üzmüşüm seni sen de çok dolmuşsun ben burdayken seni anlayamamışım. Özür diliyorum bundan ötürü senden. Daha da dikkatli olmaya çalışıcam sana sevgimi göstermeye çalışıcam , çalışmicam aslında <strong>GÖSTERİCEM</strong>.</p>
+            <p>Ben seni çok seviyorum bilmukabele sen de beni çok seviyosun ikimiz de birbirimize sırılsıklam aşığız birbirimiz olmadan bir şey yapamayız biz, naparız ki. Dediğin gibi ben olmasam sana kim elinle oynama dicek. Sen olmazsan bana kim trip atıcak (şakaaaa aşkım şakaaa), sen olmazsan kim bana sigara içme dicek.</p>
+            <p>Kos kocaman 5 yıl kötü şeyler düşünüp bunu dillendirirken bile nasıl duygulandın bugün. Kötü şeyler düşünmeyelim artık birbirimize sarılalım kenetlenelim kötü şeyleri kafamızdan silelim üzmeyelim birbirimizi. Söz verdiğim gibi dikkat edicem üzmicem seni, seni her şeyden çok seviyorum iyi ki benimsin, iyi ki sevgilimsin…</p>
+            <p>Yavruummm , Güzeliimmmmm, Canım sevgilimm 💖💗💓🫶🏻</p>
+            
+            <button class="close-note-btn" onclick="closeNote()">Kapat</button>
+        </div>
+    </div>
+
+    <script>
+        let noClickCount = 0;
+        let stage = 1; 
+        
+        const noMessages = [
+            "Hayır",
+            "Emin misin?",
+            "Bir daha düşün...",
+            "Kalbimi kırıyorsun",
+            "Son kararın mı?",
+            "Tıklama şuna",
+            "İnat etme :)",
+            "Mecbur evet diyeceksin"
+        ];
+
+        // Yıldızlar
+        const canvas = document.getElementById('starsCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.02 + 0.005
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) {
+                    star.speed = -star.speed;
+                }
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', initStars);
+        initStars();
+        drawStars();
+
+        function handleNo() {
+            noClickCount++;
+            const yesBtn = document.getElementById('yesBtn');
+            const noBtn = document.getElementById('noBtn');
+            
+            let currentSize = 18 + (noClickCount * 4);
+            let currentPaddingV = 14 + (noClickCount * 3);
+            let currentPaddingH = 28 + (noClickCount * 5);
+            
+            yesBtn.style.fontSize = currentSize + 'px';
+            yesBtn.style.padding = `${currentPaddingV}px ${currentPaddingH}px`;
+
+            if (noClickCount < noMessages.length) {
+                noBtn.innerText = noMessages[noClickCount];
+            } else {
+                noBtn.style.display = 'none'; 
+            }
+        }
+
+        function handleYes() {
+            const questionBox = document.getElementById('questionBox');
+            const bouquetScene = document.getElementById('bouquetScene');
+            const bouquetImage = document.getElementById('bouquetImage');
+            const cinematicText = document.getElementById('cinematicText');
+            const actionBtns = document.getElementById('actionBtns');
+            const starsCanvas = document.getElementById('starsCanvas');
+
+            if (stage === 1) {
+                questionBox.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    questionBox.style.display = 'none';
+                    starsCanvas.style.opacity = '1';
+                    
+                    // Buket ve yazılar karanlıktan çıkar
+                    bouquetScene.style.display = 'flex';
+                    setTimeout(() => {
+                        bouquetScene.style.opacity = '1';
+                        bouquetImage.classList.add('fade-in');
+                        cinematicText.classList.add('fade-in');
+                        actionBtns.classList.add('fade-in');
+                    }, 500);
+
+                }, 1000);
+
+            } else if (stage === 2) {
+                // Büyük Final
+                questionBox.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    questionBox.style.display = 'none';
+                    cinematicText.innerHTML = "Seni her şeyden çok seviyorum ❤️";
+                    actionBtns.style.display = 'none'; // Finalde butonlar yok
+                    
+                    bouquetScene.style.display = 'flex';
+                    setTimeout(() => {
+                        bouquetScene.style.opacity = '1';
+                        bouquetImage.classList.add('fade-in');
+                        cinematicText.classList.add('fade-in');
+                    }, 500);
+                }, 1000);
+            }
+        }
+
+        // Notu Açma / Kapama
+        function openNote() {
+            const modal = document.getElementById('paperModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('modal-active');
+            }, 10);
+        }
+
+        function closeNote() {
+            const modal = document.getElementById('paperModal');
+            modal.classList.remove('modal-active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 500);
+        }
+
+        // 2. Aşamaya Geçiş
+        function continueToNext() {
+            const bouquetScene = document.getElementById('bouquetScene');
+            const bouquetImage = document.getElementById('bouquetImage');
+            const cinematicText = document.getElementById('cinematicText');
+            const actionBtns = document.getElementById('actionBtns');
+            const questionBox = document.getElementById('questionBox');
+            
+            // Çiçek Sahnesini Gizle
+            bouquetScene.style.opacity = '0';
+            bouquetImage.classList.remove('fade-in');
+            cinematicText.classList.remove('fade-in');
+            actionBtns.classList.remove('fade-in');
+            
+            setTimeout(() => {
+                bouquetScene.style.display = 'none';
+                
+                // 2. Soruyu Hazırla ve Göster
+                document.getElementById('questionText').innerText = "Peki beni affettin mi? 🥹";
+                document.getElementById('noBtn').style.display = 'inline-block';
+                document.getElementById('noBtn').innerText = "Hayır";
+                
+                const yesBtn = document.getElementById('yesBtn');
+                yesBtn.style.fontSize = '18px';
+                yesBtn.style.padding = '14px 28px';
+                noClickCount = 0;
+                stage = 2; // Artık 2. aşamadayız
+                
+                questionBox.style.display = 'block';
+                setTimeout(() => {
+                    questionBox.classList.remove('fade-out');
+                }, 50);
+
+            }, 1000); 
+        }
+    </script>
+</body>
+</html>
