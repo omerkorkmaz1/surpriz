@@ -13,15 +13,19 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
             background-color: #000;
-            height: 100vh;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
             text-align: center;
-            color: #fff;
         }
 
         /* Yıldızlar için Canvas */
@@ -41,20 +45,12 @@
         .container {
             position: relative;
             z-index: 10;
-            width: 100%;
+            width: 90%;
             max-width: 400px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
         }
 
         .step-box {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: rgba(20, 20, 20, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 40px 20px;
             border-radius: 24px;
@@ -67,7 +63,7 @@
             margin-bottom: 30px;
             font-weight: 500;
             letter-spacing: 1px;
-            color: #f8f8f8;
+            color: #fff;
         }
 
         .btn-group {
@@ -75,7 +71,6 @@
             justify-content: center;
             align-items: center;
             gap: 15px;
-            position: relative;
             min-height: 80px;
         }
 
@@ -99,7 +94,6 @@
             background-color: #222;
             color: #888;
             border: 1px solid #333;
-            position: relative;
         }
 
         /* Gerçek Çiçek Buketi Alanı */
@@ -137,7 +131,7 @@
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
             opacity: 0;
             transform: translateY(10px);
-            transition: all 2s ease-out 1s; /* Yazı çiçekten 1 saniye sonra gelsin */
+            transition: all 2s ease-out 1s;
         }
 
         .hidden {
@@ -151,4 +145,167 @@
         }
 
         .fade-in {
-            opacity: 1
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="starsCanvas"></canvas>
+
+    <div class="container">
+        <div class="step-box" id="questionBox">
+            <h2 id="questionText">Beni seviyor musun?</h2>
+            <div class="btn-group">
+                <button id="yesBtn" onclick="handleYes()">Evet</button>
+                <button id="noBtn" onclick="handleNo()">Hayır</button>
+            </div>
+        </div>
+
+        <div class="bouquet-scene" id="bouquetScene">
+            <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55ef6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="bouquet-img" id="bouquetImage" alt="Çiçek Buketi">
+            <div class="cinematic-text" id="cinematicText">Dünyanın en güzel çiçeğine...</div>
+        </div>
+    </div>
+
+    <script>
+        let noClickCount = 0;
+        let stage = 1; 
+        
+        const noMessages = [
+            "Hayır",
+            "Emin misin?",
+            "Bir daha düşün...",
+            "Kalbimi kırıyorsun",
+            "Son kararın mı?",
+            "Tıklama şuna",
+            "İnat etme :)",
+            "Mecbur evet diyeceksin"
+        ];
+
+        const canvas = document.getElementById('starsCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.02 + 0.005
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) {
+                    star.speed = -star.speed;
+                }
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', initStars);
+        initStars();
+        drawStars();
+
+        function handleNo() {
+            noClickCount++;
+            const yesBtn = document.getElementById('yesBtn');
+            const noBtn = document.getElementById('noBtn');
+            
+            let currentSize = 18 + (noClickCount * 4);
+            let currentPaddingV = 14 + (noClickCount * 3);
+            let currentPaddingH = 28 + (noClickCount * 5);
+            
+            yesBtn.style.fontSize = currentSize + 'px';
+            yesBtn.style.padding = `${currentPaddingV}px ${currentPaddingH}px`;
+
+            if (noClickCount < noMessages.length) {
+                noBtn.innerText = noMessages[noClickCount];
+            } else {
+                noBtn.style.display = 'none'; 
+            }
+        }
+
+        function handleYes() {
+            const questionBox = document.getElementById('questionBox');
+            const bouquetScene = document.getElementById('bouquetScene');
+            const bouquetImage = document.getElementById('bouquetImage');
+            const cinematicText = document.getElementById('cinematicText');
+            const starsCanvas = document.getElementById('starsCanvas');
+
+            if (stage === 1) {
+                questionBox.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    questionBox.style.display = 'none';
+                    starsCanvas.style.opacity = '1';
+                    
+                    bouquetScene.style.display = 'flex';
+                    setTimeout(() => {
+                        bouquetScene.style.opacity = '1';
+                        bouquetImage.classList.add('fade-in');
+                        cinematicText.classList.add('fade-in');
+                    }, 500);
+
+                    setTimeout(() => {
+                        bouquetScene.style.opacity = '0';
+                        bouquetImage.classList.remove('fade-in');
+                        cinematicText.classList.remove('fade-in');
+                        
+                        setTimeout(() => {
+                            bouquetScene.style.display = 'none';
+                            
+                            document.getElementById('questionText').innerText = "Peki beni affettin mi?";
+                            document.getElementById('noBtn').style.display = 'inline-block';
+                            document.getElementById('noBtn').innerText = "Hayır";
+                            
+                            const yesBtn = document.getElementById('yesBtn');
+                            yesBtn.style.fontSize = '18px';
+                            yesBtn.style.padding = '14px 28px';
+                            noClickCount = 0;
+                            stage = 2;
+                            
+                            questionBox.style.display = 'block';
+                            setTimeout(() => {
+                                questionBox.classList.remove('fade-out');
+                            }, 50);
+
+                        }, 2000);
+                    }, 6000); 
+
+                }, 1000);
+
+            } else if (stage === 2) {
+                questionBox.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    questionBox.style.display = 'none';
+                    cinematicText.innerHTML = "Biliyordum...<br><br>Seni çok seviyorum ❤️";
+                    
+                    bouquetScene.style.display = 'flex';
+                    setTimeout(() => {
+                        bouquetScene.style.opacity = '1';
+                        bouquetImage.classList.add('fade-in');
+                        cinematicText.classList.add('fade-in');
+                    }, 500);
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
