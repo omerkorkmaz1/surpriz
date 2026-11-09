@@ -28,7 +28,6 @@
             text-align: center;
         }
 
-        /* Yıldızlar için Canvas */
         #starsCanvas {
             position: fixed;
             top: 0;
@@ -41,7 +40,6 @@
             pointer-events: none;
         }
 
-        /* Ana İçerik Konteyneri */
         .container {
             position: relative;
             z-index: 10;
@@ -96,7 +94,7 @@
             border: 1px solid #333;
         }
 
-        /* Gerçek Çiçek Buketi Alanı */
+        /* Papatya Buketine Özel Tasarım Ayarı */
         .bouquet-scene {
             position: absolute;
             top: 50%;
@@ -112,11 +110,11 @@
         }
 
         .bouquet-img {
-            width: 280px;
-            height: 380px;
-            object-fit: cover;
-            border-radius: 20px;
-            box-shadow: 0 0 50px rgba(255, 105, 180, 0.3), 0 0 100px rgba(255, 255, 255, 0.1);
+            width: 320px; /* Papatya buketinin daha yayvan yapısına uyumlu */
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 40px rgba(255, 255, 255, 0.2)); /* Şık ve hafif bir dış ışıltı */
             margin-bottom: 25px;
             opacity: 0;
             transform: translateY(20px);
@@ -164,7 +162,8 @@
         </div>
 
         <div class="bouquet-scene" id="bouquetScene">
-            <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55ef6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="bouquet-img" id="bouquetImage" alt="Çiçek Buketi">
+            <!-- DİKKAT: Yüklediğin resmin adı farklıysa aşağıdaki cicek.png kısmını değiştirmelisin -->
+            <img src="cicek.png" class="bouquet-img" id="bouquetImage" alt="Papatya Buketi">
             <div class="cinematic-text" id="cinematicText">Dünyanın en güzel çiçeğine...</div>
         </div>
     </div>
