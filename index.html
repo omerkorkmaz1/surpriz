@@ -24,7 +24,7 @@
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
             padding: 30px 20px;
             border-radius: 20px;
@@ -38,7 +38,7 @@
         h2 {
             color: #d63384;
             font-size: 24px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             font-weight: 700;
         }
 
@@ -85,16 +85,33 @@
             z-index: 5;
         }
 
-        .hidden {
-            display: none !important;
+        /* Çiçek Buketi ve Mesaj Alanı */
+        .celebration-box {
+            display: none;
+            animation: fadeIn 1s ease-in-out forwards;
         }
 
-        /* Sonuç Yazısı */
-        #messageArea {
-            font-size: 22px;
-            color: #ff3366;
+        .bouquet-img {
+            font-size: 70px;
+            margin-bottom: 15px;
+            animation: bounce 1.5s infinite alternate;
+        }
+
+        .love-text {
+            font-size: 20px;
+            color: #d63384;
             font-weight: bold;
-            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
         }
     </style>
 </head>
@@ -110,6 +127,12 @@
                 <button id="yesBtn" onclick="handleYes()">Evet</button>
                 <button id="noBtn" onclick="handleNo()">Hayır</button>
             </div>
+        </div>
+
+        <!-- Çiçek Şöleni ve Sonrası İçin Gizli Alan -->
+        <div id="celebrationArea" class="celebration-box">
+            <div class="bouquet-img">💐🌷🌸</div>
+            <div class="love-text" id="finalMessage">Dünyanın en güzel çiçeğine... İyi ki varsın sevgilim! ❤️</div>
         </div>
     </div>
 
@@ -133,10 +156,10 @@
             const yesBtn = document.getElementById('yesBtn');
             const noBtn = document.getElementById('noBtn');
             
-            // Evet butonunu büyüt
-            let currentSize = 18 + (noClickCount * 6);
-            let currentPaddingV = 12 + (noClickCount * 3);
-            let currentPaddingH = 25 + (noClickCount * 5);
+            // Evet butonunu devleştir
+            let currentSize = 18 + (noClickCount * 7);
+            let currentPaddingV = 12 + (noClickCount * 4);
+            let currentPaddingH = 25 + (noClickCount * 6);
             
             yesBtn.style.fontSize = currentSize + 'px';
             yesBtn.style.padding = `${currentPaddingV}px ${currentPaddingH}px`;
@@ -145,79 +168,87 @@
             if (noClickCount < noMessages.length) {
                 noBtn.innerText = noMessages[noClickCount];
             } else {
-                // Hayır butonunu tamamen ortadan kaldır, kaçacak yer bırakma :)
-                noBtn.style.display = 'none';
+                noBtn.style.display = 'none'; // Kaçacak yer bırakma :)
             }
         }
 
         function handleYes() {
+            const step1 = document.getElementById('step1');
+            const celebrationArea = document.getElementById('celebrationArea');
+            const finalMessage = document.getElementById('finalMessage');
+
             if (stage === 1) {
-                // Birinci aşama (Sevgi) bitti, kutlama ve 2. aşamaya geçiş
-                startCelebration();
+                // 1. Aşama "Evet"e basıldı: Çiçek şöleni ve buket göster
+                step1.style.display = 'none';
+                celebrationArea.style.display = 'block';
+                finalMessage.innerHTML = "Dünyanın en güzel çiçeğine... 🌸<br>Seni çok seviyorum!";
                 
+                startFullCelebration();
+                
+                // 3.5 saniye sonra 2. aşama (Affettin mi?) sorusuna geç
                 setTimeout(() => {
+                    celebrationArea.style.display = 'none';
+                    step1.style.display = 'block';
                     document.getElementById('questionText').innerText = "Beni affettin mi? 🥹";
                     document.getElementById('noBtn').style.display = 'inline-block';
                     document.getElementById('noBtn').innerText = "Hayır";
+                    
                     const yesBtn = document.getElementById('yesBtn');
                     yesBtn.style.fontSize = '18px';
                     yesBtn.style.padding = '12px 25px';
                     noClickCount = 0;
                     stage = 2;
-                }, 3000); // 3 saniye çiçek şöleni sürsün sonra affettin mi gelsin
+                }, 4000);
+
             } else if (stage === 2) {
-                // İkinci aşama (Af) bitti, final kutlaması
-                startCelebration();
-                document.getElementById('cardContainer').innerHTML = `
-                    <div id="messageArea">Biliyordum! Seni çok ama çok seviyorum ❤️🌸</div>
-                    <p style="color: #666; font-size: 16px;">İyi ki varsın sevgilim...</p>
-                `;
+                // 2. Aşama (Af) "Evet"e basıldı: Büyük Final
+                step1.style.display = 'none';
+                celebrationArea.style.display = 'block';
+                finalMessage.innerHTML = "Biliyordum! İyi ki benimsin ❤️<br>Seni her şeyden çok seviyorum!";
+                startFullCelebration();
             }
         }
 
-        // iPhone ve tüm ekranlar için optimize edilmiş basit çiçek/kalp yağmuru (Canvas)
-        function startCelebration() {
+        // iPhone 11 ve tüm ekranlarda akıcı çalışan çiçek / kalp şöleni animasyonu
+        function startFullCelebration() {
             const canvas = document.getElementById('fireworks');
             const ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
             let particles = [];
-            const symbols = ['❤️', '🌸', '💐', '🌷', '✨', '💖'];
+            const symbols = ['🌸', '💐', '🌷', '❤️', '💖', '✨', '🌹'];
 
-            for (let i = 0; i < 50; i++) {
-                particles.pages = {
+            for (let i = 0; i < 70; i++) {
+                particles.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height - canvas.height,
                     symbol: symbols[Math.floor(Math.random() * symbols.length)],
-                    speed: Math.random() * 3 + 2,
-                    size: Math.random() * 20 + 10,
+                    speed: Math.random() * 4 + 2,
+                    size: Math.random() * 25 + 15,
                     angle: Math.random() * 2 - 1
-                };
+                });
             }
 
-            // Daha temiz bir emoji animasyon döngüsü
-            let animationFrame;
             let count = 0;
-
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
-                particles.forEach((p, index) => {
+                particles.forEach((p) => {
                     ctx.font = `${p.size}px Arial`;
                     ctx.fillText(p.symbol, p.x, p.y);
                     p.y += p.speed;
                     p.x += p.angle;
 
                     if (p.y > canvas.height) {
-                        p.y = -20;
+                        p.y = -30;
                         p.x = Math.random() * canvas.width;
                     }
                 });
 
                 count++;
-                if (count < 150) {
-                    animationFrame = requestAnimationFrame(draw);
+                if (count < 220) {
+                    requestAnimationFrame(draw);
                 } else {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                 }
